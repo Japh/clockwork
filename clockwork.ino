@@ -6,6 +6,7 @@ unsigned long lastSync = millis();
 
 int led = D7;
 unsigned int ledState = 0;
+int brtns = 7; // max 15, min 1
 
 String lastTime;
 String currentTime;
@@ -43,6 +44,7 @@ void setup() {
   delay(500);
   alpha4.clear();
   alpha4.writeDisplay();
+  alpha4.setBrightness(brtns);
 }
 
 void loop() {
