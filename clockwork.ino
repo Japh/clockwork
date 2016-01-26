@@ -6,7 +6,7 @@ unsigned long lastSync = millis();
 
 int led = D7;
 unsigned int ledState = 0;
-int brtns = 7; // max 15, min 1
+int brtns = 0; // max 15, min 0
 
 String lastTime;
 String currentTime;
