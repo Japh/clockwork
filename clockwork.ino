@@ -21,7 +21,7 @@ void setup() {
 	Particle.syncTime();
   lastSync = millis();
 
-  //Particle.variable("CurrentTime", currentTime);
+  Particle.variable("CurrentTime", Time.timeStr());
 
   pinMode(led, OUTPUT);
 
@@ -56,6 +56,7 @@ void loop() {
   currentTime = Time.timeStr();
 
   if (lastTime != currentTime) {
+    Particle.variable("CurrentTime", currentTime);
     if ( ledState == 0 ) {
       ledState = 1;
       digitalWrite(led, HIGH);
