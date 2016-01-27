@@ -68,6 +68,9 @@ void loop() {
       }
       alpha4.setBrightness(brtns);
       brighter = true;
+      char cw_brightness[8];
+      sprintf(cw_brightness, "%d", brtns);
+      Particle.publish("clockwork_brightness", cw_brightness);
     }
   } else {
     RGB.color(0,255,0);
