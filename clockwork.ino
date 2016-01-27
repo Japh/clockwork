@@ -5,8 +5,10 @@
 unsigned long lastSync = millis();
 
 int led = D7;
+int switchPin = D5;
 unsigned int ledState = 0;
 int brtns = 0; // max 15, min 0
+bool brighter = false;
 
 String lastTime;
 String currentTime;
@@ -23,7 +25,10 @@ void setup() {
 
   Particle.variable("CurrentTime", Time.timeStr());
 
+  RGB.control(true);
   pinMode(led, OUTPUT);
+  //pinMode(switchPin, INPUT);
+  pinMode(switchPin, INPUT_PULLUP);
 
   alpha4.begin(0x70);  // pass in the address
 
@@ -51,6 +56,22 @@ void loop() {
   if (millis() - lastSync > ONE_DAY_MILLIS) {
     Particle.syncTime();
     lastSync = millis();
+  }
+
+  if (digitalRead(switchPin) == HIGH) {
+    RGB.color(255,0,0);
+    if (! brighter) {
+      if (brtns >= 14) {
+        brtns = 0;
+      } else {
+        brtns = brtns + 5;
+      }
+      alpha4.setBrightness(brtns);
+      brighter = true;
+    }
+  } else {
+    RGB.color(0,255,0);
+    brighter = false;
   }
 
   currentTime = Time.timeStr();
