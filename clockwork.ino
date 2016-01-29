@@ -5,10 +5,14 @@
 unsigned long lastSync = millis();
 
 int led = D7;
-int switchPin = D5;
+int switchPinBrightness = D5;
+int switchPinToggle = D4;
 unsigned int ledState = 0;
 int brtns = 0; // max 15, min 0
 bool brighter = false;
+int currentDisplayState = 0;
+int maxDisplayState = 1;
+bool togglingDisplayState = false;
 
 String lastTime;
 String currentTime;
@@ -27,8 +31,9 @@ void setup() {
 
   RGB.control(true);
   pinMode(led, OUTPUT);
-  //pinMode(switchPin, INPUT);
-  pinMode(switchPin, INPUT_PULLUP);
+  //pinMode(switchPinBrightness, INPUT);
+  pinMode(switchPinBrightness, INPUT_PULLUP);
+  pinMode(switchPinToggle, INPUT_PULLUP);
 
   alpha4.begin(0x70);  // pass in the address
 
@@ -58,7 +63,7 @@ void loop() {
     lastSync = millis();
   }
 
-  if (digitalRead(switchPin) == HIGH) {
+  if (digitalRead(switchPinBrightness) == HIGH) {
     RGB.color(255,0,0);
     if (! brighter) {
       if (brtns >= 14) {
@@ -77,6 +82,31 @@ void loop() {
     brighter = false;
   }
 
+  if (digitalRead(switchPinToggle) == HIGH) {
+    if (! togglingDisplayState) {
+      if (currentDisplayState < maxDisplayState) {
+        currentDisplayState++;
+      } else {
+        currentDisplayState = 0;
+      }
+      togglingDisplayState = true;
+      char cw_state[8];
+      sprintf(cw_state, "%d", currentDisplayState);
+      Particle.publish("clockwork_state", cw_state);
+    }
+  } else {
+    togglingDisplayState = false;
+  }
+
+  switch(currentDisplayState) {
+    case 1 :
+      displayMessage();
+    default :
+      displayTime();
+  }
+}
+
+void displayTime() {
   currentTime = Time.timeStr();
 
   if (lastTime != currentTime) {
@@ -93,6 +123,22 @@ void loop() {
     alpha4.writeDigitAscii(1, currentTime[12]);
     alpha4.writeDigitAscii(2, currentTime[14]);
     alpha4.writeDigitAscii(3, currentTime[15]);
+    alpha4.writeDisplay();
+
+    lastTime = currentTime;
+  }
+}
+
+void displayMessage() {
+  currentTime = Time.timeStr();
+
+  if (lastTime != currentTime) {
+    ledState = 0;
+    digitalWrite(led, LOW);
+    alpha4.writeDigitAscii(0, 'L');
+    alpha4.writeDigitAscii(1, 'O');
+    alpha4.writeDigitAscii(2, 'V');
+    alpha4.writeDigitAscii(3, 'E');
     alpha4.writeDisplay();
 
     lastTime = currentTime;
