@@ -67,6 +67,23 @@ void loop() {
     lastSync = millis();
   }
 
+  if (digitalRead(switchPinToggle) == LOW) {
+    RGB.color(255,0,0);
+    if (! togglingDisplayState) {
+      togglingDisplayState = true;
+      if (currentDisplayState < maxDisplayState) {
+        currentDisplayState++;
+      } else {
+        currentDisplayState = 1;
+      }
+      char cw_state[8];
+      sprintf(cw_state, "%d", currentDisplayState);
+      Particle.publish("clockwork_state", cw_state);
+    }
+  } else {
+    togglingDisplayState = false;
+  }
+
   if (digitalRead(switchPinBrightness) == LOW) {
     RGB.color(0,255,0);
     if (! brighter) {
@@ -83,23 +100,6 @@ void loop() {
     }
   } else {
     brighter = false;
-  }
-
-  if (digitalRead(switchPinToggle) == LOW) {
-    RGB.color(255,0,0);
-    if (! togglingDisplayState) {
-      togglingDisplayState = true;
-      if (currentDisplayState < maxDisplayState) {
-        currentDisplayState++;
-      } else {
-        currentDisplayState = 1;
-      }
-      char cw_state[8];
-      sprintf(cw_state, "%d", currentDisplayState);
-      Particle.publish("clockwork_state", cw_state);
-    }
-  } else {
-    togglingDisplayState = false;
   }
 
   switch(currentDisplayState) {
