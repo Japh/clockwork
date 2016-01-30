@@ -10,8 +10,8 @@ int switchPinToggle = D4;
 unsigned int ledState = 0;
 int brtns = 0; // max 15, min 0
 bool brighter = false;
-int currentDisplayState = 0;
-int maxDisplayState = 1;
+int currentDisplayState = 1;
+int maxDisplayState = 2;
 bool togglingDisplayState = false;
 
 String currentTemperature;
@@ -86,12 +86,12 @@ void loop() {
 
   if (digitalRead(switchPinToggle) == HIGH) {
     if (! togglingDisplayState) {
+      togglingDisplayState = true;
       if (currentDisplayState < maxDisplayState) {
         currentDisplayState++;
       } else {
-        currentDisplayState = 0;
+        currentDisplayState = 1;
       }
-      togglingDisplayState = true;
       char cw_state[8];
       sprintf(cw_state, "%d", currentDisplayState);
       Particle.publish("clockwork_state", cw_state);
@@ -103,6 +103,8 @@ void loop() {
   switch(currentDisplayState) {
     case 1 :
       displayTemperature();
+    case 2 :
+      displayTime();
     default :
       displayTime();
   }
@@ -153,6 +155,7 @@ void displayTemperature() {
   if (lastTime != currentTime) {
     ledState = 0;
     digitalWrite(led, LOW);
+    RGB.color(255,255,0);
     alpha4.writeDigitAscii(0, currentTemperature[0]);
     alpha4.writeDigitAscii(1, currentTemperature[1]);
     alpha4.writeDigitAscii(2, currentTemperature[2]);
@@ -165,4 +168,5 @@ void displayTemperature() {
 
 int setTemperature(String currentTemp) {
   currentTemperature = currentTemp;
+  Particle.publish("clockwork_temperature", currentTemperature);
 }
