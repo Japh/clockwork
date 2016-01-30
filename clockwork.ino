@@ -14,6 +14,7 @@ int currentDisplayState = 0;
 int maxDisplayState = 1;
 bool togglingDisplayState = false;
 
+String currentTemperature;
 String lastTime;
 String currentTime;
 
@@ -28,6 +29,7 @@ void setup() {
   lastSync = millis();
 
   Particle.variable("CurrentTime", Time.timeStr());
+  Particle.function("currentTemp", setTemperature);
 
   RGB.control(true);
   pinMode(led, OUTPUT);
@@ -100,7 +102,7 @@ void loop() {
 
   switch(currentDisplayState) {
     case 1 :
-      displayMessage();
+      displayTemperature();
     default :
       displayTime();
   }
@@ -143,4 +145,24 @@ void displayMessage() {
 
     lastTime = currentTime;
   }
+}
+
+void displayTemperature() {
+  currentTime = Time.timeStr();
+
+  if (lastTime != currentTime) {
+    ledState = 0;
+    digitalWrite(led, LOW);
+    alpha4.writeDigitAscii(0, currentTemperature[0]);
+    alpha4.writeDigitAscii(1, currentTemperature[1]);
+    alpha4.writeDigitAscii(2, currentTemperature[2]);
+    alpha4.writeDigitAscii(3, currentTemperature[3]);
+    alpha4.writeDisplay();
+
+    lastTime = currentTime;
+  }
+}
+
+int setTemperature(String currentTemp) {
+  currentTemperature = currentTemp;
 }
