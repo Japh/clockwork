@@ -10,7 +10,7 @@ int switchPinToggle = D4;
 unsigned int ledState = 0;
 int brtns = 0; // max 15, min 0
 bool brighter = false;
-int currentDisplayState = 1;
+int currentDisplayState = 0;
 int maxDisplayState = 2;
 bool togglingDisplayState = false;
 
@@ -106,7 +106,7 @@ void loop() {
     case 2 :
       displayTime();
     default :
-      displayTime();
+      displayBlank();
   }
 }
 
@@ -133,16 +133,16 @@ void displayTime() {
   }
 }
 
-void displayMessage() {
+void displayBlank() {
   currentTime = Time.timeStr();
 
   if (lastTime != currentTime) {
     ledState = 0;
     digitalWrite(led, LOW);
-    alpha4.writeDigitAscii(0, 'L');
-    alpha4.writeDigitAscii(1, 'O');
-    alpha4.writeDigitAscii(2, 'V');
-    alpha4.writeDigitAscii(3, 'E');
+    alpha4.writeDigitAscii(0, ' ');
+    alpha4.writeDigitAscii(1, ' ');
+    alpha4.writeDigitAscii(2, ' ');
+    alpha4.writeDigitAscii(3, ' ');
     alpha4.writeDisplay();
 
     lastTime = currentTime;
