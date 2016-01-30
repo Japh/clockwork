@@ -8,11 +8,13 @@ int led = D7;
 int switchPinBrightness = D5;
 int switchPinToggle = D4;
 unsigned int ledState = 0;
-int brtns = 0; // max 15, min 0
+int currentBrightness = 0; // max 15, min 0
 bool brighter = false;
-int currentDisplayState = 0;
+int currentDisplayState = 1;
 int maxDisplayState = 2;
 bool togglingDisplayState = false;
+int sleepInterval = 30000;
+int lastAction;
 
 String currentTemperature;
 String lastTime;
@@ -56,7 +58,7 @@ void setup() {
   delay(500);
   alpha4.clear();
   alpha4.writeDisplay();
-  alpha4.setBrightness(brtns);
+  alpha4.setBrightness(currentBrightness);
 }
 
 void loop() {
@@ -74,12 +76,13 @@ void loop() {
       if (currentDisplayState < maxDisplayState) {
         currentDisplayState++;
       } else {
-        currentDisplayState = 1;
+        currentDisplayState = 0;
       }
       char cw_state[8];
       sprintf(cw_state, "%d", currentDisplayState);
       Particle.publish("clockwork_state", cw_state);
     }
+    lastAction = millis();
   } else {
     togglingDisplayState = false;
   }
@@ -87,28 +90,39 @@ void loop() {
   if (digitalRead(switchPinBrightness) == LOW) {
     RGB.color(0,255,0);
     if (! brighter) {
-      if (brtns >= 14) {
-        brtns = 0;
-      } else {
-        brtns = brtns + 5;
-      }
-      alpha4.setBrightness(brtns);
       brighter = true;
+      if (currentBrightness >= 14) {
+        currentBrightness = 0;
+      } else {
+        currentBrightness = currentBrightness + 5;
+      }
+      alpha4.setBrightness(currentBrightness);
+      if (currentBrightness > 0 && currentDisplayState == 0) {
+        currentDisplayState = 1;
+      }
       char cw_brightness[8];
-      sprintf(cw_brightness, "%d", brtns);
+      sprintf(cw_brightness, "%d", currentBrightness);
       Particle.publish("clockwork_brightness", cw_brightness);
     }
+    lastAction = millis();
   } else {
     brighter = false;
   }
 
+  if (millis() > (lastAction + sleepInterval)) {
+    currentDisplayState = 0;
+  }
+
   switch(currentDisplayState) {
-    case 1 :
-      displayTemperature();
-    case 2 :
+    case 1:
       displayTime();
-    default :
+      break;
+    case 2:
+      displayTemperature();
+      break;
+    default:
       displayBlank();
+      break;
   }
 }
 
