@@ -60,13 +60,15 @@ void setup() {
 }
 
 void loop() {
+  RGB.color(0,0,0);
+
   if (millis() - lastSync > ONE_DAY_MILLIS) {
     Particle.syncTime();
     lastSync = millis();
   }
 
-  if (digitalRead(switchPinBrightness) == HIGH) {
-    RGB.color(255,0,0);
+  if (digitalRead(switchPinBrightness) == LOW) {
+    RGB.color(0,255,0);
     if (! brighter) {
       if (brtns >= 14) {
         brtns = 0;
@@ -80,11 +82,11 @@ void loop() {
       Particle.publish("clockwork_brightness", cw_brightness);
     }
   } else {
-    RGB.color(0,255,0);
     brighter = false;
   }
 
-  if (digitalRead(switchPinToggle) == HIGH) {
+  if (digitalRead(switchPinToggle) == LOW) {
+    RGB.color(255,0,0);
     if (! togglingDisplayState) {
       togglingDisplayState = true;
       if (currentDisplayState < maxDisplayState) {
@@ -155,7 +157,6 @@ void displayTemperature() {
   if (lastTime != currentTime) {
     ledState = 0;
     digitalWrite(led, LOW);
-    RGB.color(255,255,0);
     alpha4.writeDigitAscii(0, currentTemperature[0]);
     alpha4.writeDigitAscii(1, currentTemperature[1]);
     alpha4.writeDigitAscii(2, currentTemperature[2]);
