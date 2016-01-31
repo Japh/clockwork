@@ -17,6 +17,7 @@ int sleepInterval = 30000;
 int lastAction;
 int messageLoops = 3;
 int previousDisplayState;
+bool noSleep = false;
 
 String currentTemperature;
 String lastTime;
@@ -113,7 +114,7 @@ void loop() {
     brighter = false;
   }
 
-  if (millis() > (lastAction + sleepInterval)) {
+  if (millis() > (lastAction + sleepInterval) && ! noSleep) {
     currentDisplayState = 0;
   }
 
@@ -197,6 +198,7 @@ int setMessage(String message) {
   currentMessage = message;
   previousDisplayState = currentDisplayState;
   currentDisplayState = 99;
+  noSleep = true;
   Particle.publish("clockwork_message", currentMessage);
 }
 
@@ -227,6 +229,7 @@ void displayMessage() {
     }
 
     currentMessage = "";
+    noSleep = false;
     currentDisplayState = (previousDisplayState ? previousDisplayState : 1);
     lastTime = currentTime;
   }
