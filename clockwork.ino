@@ -15,10 +15,13 @@ int maxDisplayState = 2;
 bool togglingDisplayState = false;
 int sleepInterval = 30000;
 int lastAction;
+int messageLoops = 3;
+int previousDisplayState;
 
 String currentTemperature;
 String lastTime;
 String currentTime;
+String currentMessage;
 
 Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 
@@ -120,6 +123,9 @@ void loop() {
     case 2:
       displayTemperature();
       break;
+    case 99:
+      displayMessage();
+      break;
     default:
       displayBlank();
       break;
@@ -184,4 +190,43 @@ void displayTemperature() {
 int setTemperature(String currentTemp) {
   currentTemperature = currentTemp;
   Particle.publish("clockwork_temperature", currentTemperature);
+}
+
+int setMessage(String message) {
+  currentMessage = message;
+  previousDisplayState = currentDisplayState;
+  currentDisplayState = 99;
+  Particle.publish("clockwork_message", currentMessage);
+}
+
+void displayMessage() {
+  if (currentMessage == "") {
+    currentDisplayState = (previousDisplayState ? previousDisplayState : 1);
+    return;
+  }
+
+  currentTime = Time.timeStr();
+
+  if (lastTime != currentTime) {
+    ledState = 0;
+    digitalWrite(led, LOW);
+
+    String preparedMessage;
+    preparedMessage = "    " + currentMessage + "    ";
+    int l = strlen(preparedMessage);
+    for (int j = 0; j < messageLoops; j++) {
+      for (int i = 0; i < (l - 3); i++) {
+        alpha4.writeDigitAscii(0, preparedMessage[i]);
+        alpha4.writeDigitAscii(1, preparedMessage[i+1]);
+        alpha4.writeDigitAscii(2, preparedMessage[i+2]);
+        alpha4.writeDigitAscii(3, preparedMessage[i+3]);
+        alpha4.writeDisplay();
+        delay(200);
+      }
+    }
+
+    currentMessage = "";
+    currentDisplayState = (previousDisplayState ? previousDisplayState : 1);
+    lastTime = currentTime;
+  }
 }
