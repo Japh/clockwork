@@ -35,6 +35,7 @@ void setup() {
 
   Particle.variable("CurrentTime", Time.timeStr());
   Particle.function("currentTemp", setTemperature);
+  Particle.function("currentMsg", setMessage);
 
   RGB.control(true);
   pinMode(led, OUTPUT);
