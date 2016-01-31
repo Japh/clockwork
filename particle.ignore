@@ -8,4 +8,4 @@ gfxfont.h
 glcdfont.c
 .git
 .ideas
-photon_firmware*
+*.bin
