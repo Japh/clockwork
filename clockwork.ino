@@ -41,7 +41,7 @@ void setup() {
   RGB.control(true);
   pinMode(led, OUTPUT);
   //pinMode(switchPinBrightness, INPUT);
-  pinMode(switchPinBrightness, INPUT_PULLUP);
+  pinMode(switchPinBrightness, INPUT);
   pinMode(switchPinToggle, INPUT_PULLUP);
 
   alpha4.begin(0x70);  // pass in the address
@@ -92,7 +92,7 @@ void loop() {
     togglingDisplayState = false;
   }
 
-  if (digitalRead(switchPinBrightness) == LOW) {
+  if (digitalRead(switchPinBrightness) == HIGH) {
     RGB.color(0,255,0);
     if (! brighter) {
       brighter = true;
