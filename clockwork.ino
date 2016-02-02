@@ -55,7 +55,6 @@ void setup() {
 
   RGB.control(true);
   pinMode(led, OUTPUT);
-  //pinMode(switchPinBrightness, INPUT);
   pinMode(switchPinBrightness, INPUT);
   pinMode(switchPinToggle, INPUT_PULLUP);
 
