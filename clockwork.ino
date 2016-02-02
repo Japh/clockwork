@@ -18,11 +18,26 @@ int lastAction;
 int messageLoops = 3;
 int previousDisplayState;
 bool noSleep = false;
+uint16_t spinnerFrames[] = {
+  0b0010000000000000,
+  0b0001000000000000,
+  0b0000100000000000,
+  0b0000000001000000,
+  0b0000000100000000,
+  0b0000001000000000,
+  0b0000010000000000,
+  0b0000000010000000,
+};
+int spinnerPosition = 0;
 
 String currentTemperature;
 String lastTime;
 String currentTime;
 String currentMessage;
+
+int sizeOfSpinnerFrames = sizeof( spinnerFrames );
+int sizeOfSpinnerFramesElement = sizeof( spinnerFrames[0] );
+int lengthOfSpinnerFrames = sizeOfSpinnerFrames / sizeOfSpinnerFramesElement;
 
 Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 
@@ -49,6 +64,7 @@ void setup() {
   alpha4.clear();
   alpha4.writeDisplay();
   delay(250);
+  spin();
   alpha4.writeDigitAscii(0, 'C');
   alpha4.writeDigitAscii(1, 'L');
   alpha4.writeDigitAscii(2, 'C');
@@ -179,11 +195,15 @@ void displayTemperature() {
   if (lastTime != currentTime) {
     ledState = 0;
     digitalWrite(led, LOW);
-    alpha4.writeDigitAscii(0, currentTemperature[0]);
-    alpha4.writeDigitAscii(1, currentTemperature[1]);
-    alpha4.writeDigitAscii(2, currentTemperature[2]);
-    alpha4.writeDigitAscii(3, currentTemperature[3]);
-    alpha4.writeDisplay();
+    if ( currentTemperature == "" ) {
+      spin();
+    } else {
+      alpha4.writeDigitAscii(0, currentTemperature[0]);
+      alpha4.writeDigitAscii(1, currentTemperature[1]);
+      alpha4.writeDigitAscii(2, currentTemperature[2]);
+      alpha4.writeDigitAscii(3, currentTemperature[3]);
+      alpha4.writeDisplay();
+    }
 
     lastTime = currentTime;
   }
@@ -232,5 +252,18 @@ void displayMessage() {
     noSleep = false;
     currentDisplayState = (previousDisplayState ? previousDisplayState : 1);
     lastTime = currentTime;
+  }
+}
+
+void spin() {
+  alpha4.writeDigitRaw(0, 0x0000);
+  alpha4.writeDigitRaw(1, 0x0000);
+  alpha4.writeDigitRaw(2, 0x0000);
+  alpha4.writeDigitRaw(3, spinnerFrames[spinnerPosition]);
+  alpha4.writeDisplay();
+  if (spinnerPosition < (lengthOfSpinnerFrames-1)) {
+    spinnerPosition = spinnerPosition + 1;
+  } else {
+    spinnerPosition = 0;
   }
 }
